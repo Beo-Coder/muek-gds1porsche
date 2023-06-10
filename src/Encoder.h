@@ -9,9 +9,7 @@
 class Encoder {
 
     bool readButton() const;
-    bool previousButtonState;
-
-    void (*isr)();
+    bool previousButtonState{};
 
 
 public:
@@ -21,7 +19,7 @@ public:
     int8_t flag = 0;
     bool buttonFlag = false;
 
-    Encoder(uint8_t clkPin, uint8_t dtPin, uint8_t buttonPin, void (*isr)(), void (*buttonIsr)());
+    Encoder(uint8_t clkPin, uint8_t dtPin, uint8_t buttonPin, void (*isr)());
 
     void setEncoderFlag(int8_t direction);
 

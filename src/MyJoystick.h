@@ -52,21 +52,21 @@ class MyJoystick {
     JoystickHID *hid;
     KeyboardHID *keyboard;
 
-    uint8_t preset;
-    uint8_t newPreset;
+    uint8_t preset{};
+    uint8_t newPreset{};
 
-    uint8_t joystickMode;
+    uint8_t joystickMode{};
 
-    uint8_t newJoystickMode;
+    uint8_t newJoystickMode{};
 
 
-    uint8_t axisCount;
-    uint8_t buttonCount;
+    uint8_t axisCount{};
+    uint8_t buttonCount{};
 
-    uint8_t newAxisCount;
-    uint8_t newButtonCount;
+    uint8_t newAxisCount{};
+    uint8_t newButtonCount{};
 
-    uint8_t digitalAxisButtons;
+    uint8_t digitalAxisButtons{};
 
     // a,b,...,y,z,1,2,...,9,0,ä,ö,ü,,,.,-,+,#,^,ß,´,F1,F2,...,F12
     uint8_t keyboardModeKeycodes[60] = {0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
@@ -85,7 +85,7 @@ class MyJoystick {
     uint8_t *buttonColumnPins;
 
 
-    uint8_t buttonMatrixValue[BUTTON_MATRIX_ROWS][BUTTON_MATRIX_COLUMNS];
+    uint8_t buttonMatrixValue[BUTTON_MATRIX_ROWS][BUTTON_MATRIX_COLUMNS]{};
 
     void loadGeneralConfig();
 
@@ -106,8 +106,8 @@ class MyJoystick {
 
 
 public:
-    Axis *axis[MAX_AXIS_COUNT];
-    Button *button[MAX_BUTTON_COUNT];
+    Axis *axis[MAX_AXIS_COUNT]{};
+    Button *button[MAX_BUTTON_COUNT]{};
 
 
     MyJoystick(MCP3204_MCP3208 *adc, EEPROM_Microchip_24 *eeprom,
@@ -139,16 +139,18 @@ public:
 
     void setNewButtonCount(uint8_t axisCount);
 
-    uint8_t getJoystickMode();
+    uint8_t getJoystickMode() const;
 
 
-    uint8_t getNewJoystickMode();
+    uint8_t getNewJoystickMode() const;
 
-    uint8_t getPreset();
+    uint8_t getPreset() const;
 
     void setNewJoystickMode(uint8_t mode);
 
     void setNewPreset(uint8_t presetIndex);
+
+    uint8_t getOutputEnable() const;
 
 
 
@@ -160,8 +162,6 @@ public:
 
     static void buttonEntryStatic(Navigator *navigator, uint8_t index);
 
-    static void presetEntryStatic(Navigator *navigator, uint8_t index);
-
     void buttonEntry(Navigator *navigator, uint8_t index);
 
 
@@ -170,7 +170,7 @@ public:
     void resetPreset(uint8_t presetNumber);
     void factoryReset();
     void storeGeneralConfig();
-    void storePreset();
+    void storePreset(uint8_t presetIndex);
 };
 
 

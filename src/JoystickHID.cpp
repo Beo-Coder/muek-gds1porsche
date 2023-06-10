@@ -311,11 +311,11 @@ const uint8_t *JoystickHID::report_desc() {
         reportDescriptor2[index++] = 0x75;
         reportDescriptor2[index++] = 0x10;
 
-        if(axisCount > 6){
+        if (axisCount > 6) {
             // REPORT_COUNT (6)
             reportDescriptor2[index++] = 0x95;
             reportDescriptor2[index++] = 0x06;
-        }else{
+        } else {
             // REPORT_COUNT (6)
             reportDescriptor2[index++] = 0x95;
             reportDescriptor2[index++] = axisCount;
@@ -327,25 +327,25 @@ const uint8_t *JoystickHID::report_desc() {
         reportDescriptor2[index++] = 0x02;
     }
 
-    if(axisCount > 6){
+    if (axisCount > 6) {
         // USAGE_PAGE (Simulation Controls)
         reportDescriptor2[index++] = 0x05;
         reportDescriptor2[index++] = 0x02;
 
 
-        if (axisCount-6 > 0) {
+        if (axisCount - 6 > 0) {
             // USAGE (Slider)
             reportDescriptor2[index++] = 0x09;
             reportDescriptor2[index++] = 0x36;
         }
 
-        if (axisCount-6 > 1) {
+        if (axisCount - 6 > 1) {
             // USAGE (Dial)
             reportDescriptor2[index++] = 0x09;
             reportDescriptor2[index++] = 0x37;
         }
 
-        if (axisCount-6 > 2) {
+        if (axisCount - 6 > 2) {
             // USAGE (Wheel)
             reportDescriptor2[index++] = 0x09;
             reportDescriptor2[index++] = 0x38;
@@ -368,13 +368,12 @@ const uint8_t *JoystickHID::report_desc() {
 
         // REPORT_COUNT (simulationCount)
         reportDescriptor2[index++] = 0x95;
-        reportDescriptor2[index++] = axisCount-6;
+        reportDescriptor2[index++] = axisCount - 6;
 
 
         // INPUT (Data,Var,Abs)
         reportDescriptor2[index++] = 0x81;
         reportDescriptor2[index++] = 0x02;
-
 
 
     } // Simulation Controls
@@ -384,10 +383,6 @@ const uint8_t *JoystickHID::report_desc() {
 
     // END_COLLECTION
     reportDescriptor2[index++] = 0xc0;
-
-
-
-
 
 
     reportLength = index;

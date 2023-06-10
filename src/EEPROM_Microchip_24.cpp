@@ -26,7 +26,8 @@ EEPROM_Microchip_24::EEPROM_Microchip_24(uint8_t i2cAddress, uint16_t highestAdd
 EEPROM_Microchip_24::EEPROM_Microchip_24(const bool addressBits[3], uint16_t highestAddress,
                                          uint8_t sdaPin,
                                          uint8_t sclPin, uint8_t maxPageWrite) {
-    this->i2cAddress = 0b1010 << 3 | (addressBits[2] & 0x01) << 2 | (addressBits[1] & 0x01) << 1 | (addressBits[0] & 0x01);
+    this->i2cAddress =
+            0b1010 << 3 | (addressBits[2] & 0x01) << 2 | (addressBits[1] & 0x01) << 1 | (addressBits[0] & 0x01);
     this->highestAddress = highestAddress;
     this->maxPageWrite = maxPageWrite;
 
@@ -135,9 +136,9 @@ bool EEPROM_Microchip_24::updatePage(uint16_t startAddress, uint8_t *data, uint8
 
 void EEPROM_Microchip_24::waitUntilACKSend() {
     uint8_t i2cReturn = 0;
-    do{
+    do {
         i2cReturn = i2c->endTransmission();
-    }while(i2cReturn == 2 || i2cReturn == 3);
+    } while (i2cReturn == 2 || i2cReturn == 3);
 
 }
 

@@ -43,10 +43,13 @@ class Navigator {
     void menuChange(uint8_t index);
     void itemAction(uint8_t index);
 
-    double testValue;
-    uint8_t testSelectInput = 3;
 
     void createMenus();
+    void reprintMenu() const;
+
+    unsigned long lcdBacklightTime;
+    unsigned long lastUserInput = 0;
+    bool backlightDim = false;
 
 
 
@@ -61,7 +64,7 @@ public:
     explicit Navigator(Display *display, MyJoystick *joystick);
 
 
-    void init(Encoder *encoder);
+    void init(Encoder *pEncoder);
 
 
     void setNextMenu(Menu *menu);
@@ -73,6 +76,7 @@ public:
 
     void checkEncoderFlag();
     void checkEncoderButtonFlag();
+    void checkDisplay();
 
 
     static void navigatorMenuChangeStatic(Navigator *navigator, uint8_t index);

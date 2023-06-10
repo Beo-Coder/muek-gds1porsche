@@ -20,6 +20,10 @@ class MCP3204_MCP3208;
 
 class Navigator;
 
+
+
+
+
 class Axis {
 
 
@@ -31,26 +35,21 @@ class Axis {
 
     uint8_t index;
 
-    uint16_t calibrationData[3];
+    uint16_t calibrationData[3]{};
     bool calibrateCenter = false;
-    uint16_t digitalCalibrationData[2];
-    double base[2];
+    uint16_t digitalCalibrationData[2]{};
+    double base[2]{};
 
     uint8_t mode = 0;
-    uint8_t digitalIndex;
-
-
-
-
-
-
+    uint8_t digitalIndex{};
+    uint8_t adcIndexChannel[8] = {3,2,1,0,7,6,5,4};
 
 
 
     long linearCalculation(uint16_t value);
     double logCalculation(double value);
     double expCalculation(double value);
-    int8_t digitalCalculation(double value);
+    int digitalCalculation(double value);
 
 
 
@@ -58,7 +57,7 @@ class Axis {
 
 public:
 
-    Menu *settingsMenu;
+    Menu *settingsMenu{};
     uint16_t readSensor() const;
 
 
@@ -69,7 +68,6 @@ public:
 
     void setBase(double pBase1, double pBase2);
     double * getBase();
-    void calculateBase();
 
 
     void setCalibrationData(const uint16_t pCalibrationData[3]);
@@ -84,13 +82,12 @@ public:
     void setMode(uint8_t pMode);
     uint8_t getMode() const;
 
-    void setDigitalIndex(uint8_t index);
+    void setDigitalIndex(uint8_t pIndex);
     uint8_t getDigitalIndex() const;
 
 
-
     int32_t getValue();
-    int8_t getDigitalValue();
+    int getDigitalValue();
 
     bool valueChanged();
 

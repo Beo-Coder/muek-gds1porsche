@@ -6,10 +6,8 @@
 #include "JoystickHID.h"
 #include "Axis.h"
 #include "Button.h"
-#include "Display.h"
 #include "Input.h"
 #include "Encoder.h"
-#include "Menu.h"
 #include "Navigator.h"
 #include "EEPROM_Microchip_24.h"
 #include "MCP3204_MCP3208.h"
@@ -35,30 +33,14 @@ MyJoystick::MyJoystick(MCP3204_MCP3208 *adc, EEPROM_Microchip_24 *eeprom,
     }
 
 
-    for (int i = 0; i < sizeof(&buttonDemuxPins) / sizeof(buttonDemuxPins[0]); i++) {
+    for (unsigned int i = 0; i < sizeof(&buttonDemuxPins) / sizeof(buttonDemuxPins[0]); i++) {
         pinMode(buttonDemuxPins[i], OUTPUT);
         digitalWrite(buttonDemuxPins[i], LOW);
     }
 
-    for (int i = 0; i < sizeof(&buttonDemuxPins) / sizeof(buttonDemuxPins[0]); i++) {
+    for (unsigned int i = 0; i < sizeof(&buttonDemuxPins) / sizeof(buttonDemuxPins[0]); i++) {
         pinMode(buttonColumnPins[i], INPUT_PULLDOWN);
     }
-
-
-
-    /*
-    pinMode(25,OUTPUT);
-    digitalWrite(25, HIGH);
-
-    //resetPreset(0);
-    //factoryReset();
-    digitalWrite(25, LOW);
-    */
-
-
-
-
-
 
 
     loadGeneralConfig();
@@ -226,7 +208,7 @@ void MyJoystick::resetPreset(uint8_t presetNumber) {
 
     // Button section
     uint8_t buttonData[EEPROM_PER_BUTTON_BYTE_SIZE];
-    buttonData[0] = (FACTORY_BUTTON_NORMAL_OPEN & 0x01) << 1 | (FACTORY_BUTTON_TOGGLE_MODE & 0x01);;
+    buttonData[0] = (FACTORY_BUTTON_NORMAL_OPEN & 0x01) << 1 | (FACTORY_BUTTON_TOGGLE_MODE & 0x01);
     for (int i = 1; i < EEPROM_PER_BUTTON_BYTE_SIZE; i++) {
         buttonData[i] = 0;
     }
@@ -237,13 +219,13 @@ void MyJoystick::resetPreset(uint8_t presetNumber) {
 
 }
 
-void MyJoystick::storePreset() {
+void MyJoystick::storePreset(uint8_t presetIndex) {
     uint16_t presetAddressBegin = (EEPROM_GENERAL_ADDRESS_BEGIN + EEPROM_GENERAL_BYTE_SIZE) +
                                   ((EEPROM_PRESET_GENERAL_BYTE_SIZE + EEPROM_PRESET_AXES_BYTE_SIZE +
-                                    EEPROM_PRESET_BUTTONS_BYTE_SIZE) * preset);
+                                    EEPROM_PRESET_BUTTONS_BYTE_SIZE) * presetIndex);
 
     // General section
-    uint8_t generalData[5] = {axisCount, buttonCount, joystickMode, 0, 0};
+    uint8_t generalData[5] = {newAxisCount, newButtonCount, newJoystickMode, 0, 0};
     eeprom->updatePage(presetAddressBegin, generalData, 5);
 
     // Axes section
@@ -308,7 +290,7 @@ void MyJoystick::storePreset() {
     // Button section
     for (int i = 0; i < buttonCount; i++) {
         uint8_t buttonData[EEPROM_PER_BUTTON_BYTE_SIZE];
-        buttonData[0] = (button[i]->getNormalOpen() & 0x01) << 1 | (button[i]->getToggleTMode() & 0x01);;
+        buttonData[0] = (button[i]->getNormalOpen() & 0x01) << 1 | (button[i]->getTogglMode() & 0x01);
         for (int j = 1; j < EEPROM_PER_BUTTON_BYTE_SIZE; j++) {
             buttonData[j] = 0;
         }
@@ -336,7 +318,7 @@ void MyJoystick::initJoystick() {
 
 
     for (uint8_t i = 0; i < buttonCount; i++) {
-        button[i] = new Button();
+        button[i] = new Button(i);
     }
 
 
@@ -349,8 +331,23 @@ void MyJoystick::initJoystick() {
     digitalAxisButtons = 0;
 
 
-    initButton();
-    initAxis();
+    for (int i = 0; i < axisCount; i++) {
+        //if in axis-digital-button Mode, add 2 Button per Axis
+        if (joystickMode == 1) {
+            if (axis[i]->getMode() == 3) {
+                button[buttonCount] = new Button(buttonCount);
+                buttonCount++;
+                button[buttonCount] = new Button(buttonCount);
+                buttonCount++;
+                axis[i]->setDigitalIndex(digitalAxisButtons / 2);
+                digitalAxisButtons += 2;
+
+
+            }
+        }
+
+
+    }
 
 
     if (joystickMode == 2) {
@@ -376,23 +373,23 @@ uint8_t MyJoystick::getNewButtonCount() const {
     return newButtonCount;
 }
 
-void MyJoystick::setNewAxisCount(uint8_t axisCount) {
-    newAxisCount = axisCount;
+void MyJoystick::setNewAxisCount(uint8_t pAxisCount) {
+    newAxisCount = pAxisCount;
 }
 
-void MyJoystick::setNewButtonCount(uint8_t buttonCount) {
-    newButtonCount = buttonCount;
+void MyJoystick::setNewButtonCount(uint8_t pButtonCount) {
+    newButtonCount = pButtonCount;
 }
 
-uint8_t MyJoystick::getJoystickMode() {
+uint8_t MyJoystick::getJoystickMode() const {
     return joystickMode;
 }
 
-uint8_t MyJoystick::getNewJoystickMode() {
+uint8_t MyJoystick::getNewJoystickMode() const {
     return newJoystickMode;
 }
 
-uint8_t MyJoystick::getPreset(){
+uint8_t MyJoystick::getPreset() const {
     return preset;
 }
 
@@ -404,33 +401,22 @@ void MyJoystick::setNewPreset(uint8_t presetIndex) {
     newPreset = presetIndex;
 }
 
+uint8_t MyJoystick::getOutputEnable() const {
+    return enable;
+}
+
 void MyJoystick::initAxis() {
-
     for (int i = 0; i < axisCount; i++) {
-        //loadAxisCalibration(i);
-
-        //if in axis-digital-button Mode, add 2 Button per Axis
-        if (joystickMode == 1) {
-            if (axis[i]->getMode() == 3) {
-                button[buttonCount] = new Button();
-                buttonCount++;
-                button[buttonCount] = new Button();
-                buttonCount++;
-                axis[i]->setDigitalIndex(digitalAxisButtons / 2);
-                digitalAxisButtons += 2;
-
-
-            }
-        }
-
+        hid->setAxis(i, axis[i]->getValue());
 
     }
+
 
 }
 
 void MyJoystick::initButton() {
     for (int i = 0; i < buttonCount; i++) {
-        //loadButtonCalibration(i);
+        hid->setButton(i, button[i]->getState());
     }
 
 }
@@ -440,6 +426,8 @@ void MyJoystick::begin() {
 
 
     if (joystickMode != 2) {
+        initButton();
+        initAxis();
         hid->sendState();
     } else {
         keyboard->releaseAll();
@@ -508,7 +496,7 @@ void MyJoystick::updateAxis() {
             // Keyboard
             for (int i = 0; i < axisCount; i++) {
                 if (axis[i]->valueChanged()) {
-                    int8_t value = axis[i]->getDigitalValue();
+                    int value = axis[i]->getDigitalValue();
                     if (value == 1) {
                         keyboard->release(keyboardModeKeycodes[i * 2 + 0], true);
                         keyboard->press(keyboardModeKeycodes[i * 2 + 1], true);
@@ -584,7 +572,7 @@ void MyJoystick::axisEntryStatic(Navigator *navigator, uint8_t index) {
 }
 
 void MyJoystick::buttonEntry(Navigator *navigator, uint8_t index) {
-    //navigator->setNextMenu(button[index]->settingsMenu);
+    navigator->setNextMenu(button[index]->settingsMenu);
 
 }
 
@@ -592,15 +580,6 @@ void MyJoystick::buttonEntryStatic(Navigator *navigator, uint8_t index) {
     navigator->joystick->buttonEntry(navigator, index);
 
 }
-
-void MyJoystick::presetEntryStatic(Navigator *navigator, uint8_t index) {
-    navigator->joystick->setNewPreset(index);
-    navigator->input->reinitPrompt();
-    navigator->input->returnToMenu();
-    navigator->setPreviousMenu();
-
-}
-
 
 
 

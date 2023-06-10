@@ -8,17 +8,18 @@
 class Navigator;
 
 class Menu {
-    String itemName[20];
-    void(*itemFunction[20])(Navigator*, uint8_t);
-    uint8_t itemFunctionIndex[20];
+    String itemName[30];
+    void(*itemFunction[30])(Navigator*, uint8_t){};
+    uint8_t itemFunctionIndex[30]{};
     uint8_t itemCount = 0;
 
     Navigator *navigator;
 
 public:
-    Menu(Navigator *navigator);
+    explicit Menu(Navigator *navigator);
     uint8_t getItemCount() const;
     String getName(uint8_t index);
+    void changeName(uint8_t index, String name);
 
     void addItem(const String &name, void (*function)(Navigator*, uint8_t)=nullptr, uint8_t index=0);
 

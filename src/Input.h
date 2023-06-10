@@ -6,6 +6,7 @@
 #define GDS1PORSCHEMUEHK_INPUT_H
 
 #include "Axis.h"
+#include "Button.h"
 
 
 class Navigator;
@@ -14,19 +15,19 @@ class Input {
 
     Navigator *navigator;
 
-    double currentValue;
-    double previousValue;
-    double *valuePointer;
-    double maxValue;
-    double minValue;
-    double stepSize;
-    uint8_t displayResolution;
+    double currentValue{};
+    double previousValue{};
+    double *valuePointer{};
+    double maxValue{};
+    double minValue{};
+    double stepSize{};
+    uint8_t displayResolution{};
 
-    uint8_t *selectValuePointer;
-    uint8_t selectIndex;
-    uint8_t previousSelectIndex;
+    uint8_t *selectValuePointer{};
+    uint8_t selectIndex{};
+    uint8_t previousSelectIndex{};
     String selectValues[10];
-    uint8_t selectValuesSize;
+    uint8_t selectValuesSize{};
     uint8_t scrollOffset = 0;
 
 
@@ -43,7 +44,7 @@ class Input {
 public:
 
 
-    Input(Navigator *navigator);
+    explicit Input(Navigator *navigator);
 
 
 
@@ -76,7 +77,6 @@ public:
     void axisCalibration(Axis *axis);
 
 
-    void axisCenterCalibrationPrompt(Axis *axis);
     void axisSetBase(Axis *axis);
 
     void axisSetMode(Axis *axis);
@@ -86,6 +86,8 @@ public:
     void generalSetAxisCount();
     void generalSetButtonCount();
     void generalSetMode();
+    void generalSetPreset();
+    void generalSavePreset();
 
     void reinitPrompt();
 
@@ -96,6 +98,9 @@ public:
 
     void resetPresetPrompt();
     void factoryResetPrompt();
+
+    void buttonMode(Button *button);
+    void buttonType(Button *button);
 };
 
 

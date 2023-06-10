@@ -4,11 +4,14 @@
 
 #include "Arduino.h"
 #include "Button.h"
-//#include "EEPROM.h"
+#include "Navigator.h"
+#include "MyJoystick.h"
+#include "Input.h"
 #include "header.h"
 
 
-Button::Button() {
+Button::Button(uint8_t pIndex) {
+    this->index = pIndex;
 }
 
 bool Button::getState() const {
@@ -22,7 +25,7 @@ bool Button::getState() const {
 
 bool Button::stateChanged(uint8_t newState) {
 
-    if(millis() - lastPressed > BUTTON_DEBOUNCE_TIME){
+    if (millis() - lastPressed > BUTTON_DEBOUNCE_TIME) {
         if (newState != currentState && !toggleMode) {
             currentState = newState;
             lastPressed = millis();
@@ -38,7 +41,7 @@ bool Button::stateChanged(uint8_t newState) {
                 lastPressed = millis();
                 currentState = false;
                 toggleState = true;
-            } else if(!newState){
+            } else if (!newState) {
                 toggleState = false;
 
             }
@@ -47,7 +50,7 @@ bool Button::stateChanged(uint8_t newState) {
         } else {
             return false;
         }
-    } else{
+    } else {
         return false;
     }
 
@@ -58,7 +61,7 @@ void Button::setToggleMode(bool pToggleMode) {
 
 }
 
-bool Button::getToggleTMode() const {
+bool Button::getTogglMode() const {
     return toggleMode;
 }
 
@@ -71,6 +74,29 @@ bool Button::getNormalOpen() const {
     return normalOpen;
 }
 
+void Button::initSettingsMenu(Navigator *navigator) {
+    settingsMenu = new Menu(navigator);
+
+    settingsMenu->addItem("Back", &Navigator::navigatorMenuChangeStatic, 0);
+    settingsMenu->addItem("Mode", &Button::buttonEntryAction, index * 10 + 1);
+    settingsMenu->addItem("Type", &Button::buttonEntryAction, index * 10 + 2);
+
+
+}
+
+void Button::buttonEntryAction(Navigator *navigator, uint8_t index) {
+    uint8_t buttonIndex = index / 10;
+    switch (index % 10) {
+        case 1:
+            navigator->input->buttonMode(navigator->joystick->button[buttonIndex]);
+            break;
+        case 2:
+            navigator->input->buttonType(navigator->joystick->button[buttonIndex]);
+            break;
+
+    }
+
+}
 
 
 
