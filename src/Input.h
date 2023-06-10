@@ -7,6 +7,7 @@
 
 #include "Axis.h"
 
+
 class Navigator;
 
 class Input {
@@ -81,6 +82,20 @@ public:
     void axisSetMode(Axis *axis);
 
     void axisCalibrationDigital(Axis *axis);
+
+    void generalSetAxisCount();
+    void generalSetButtonCount();
+    void generalSetMode();
+
+    void reinitPrompt();
+
+    void showWaitScreen(String *values);
+    void endWaitScreen();
+
+    void showEEPROMWaitScreen();
+
+    void resetPresetPrompt();
+    void factoryResetPrompt();
 };
 
 

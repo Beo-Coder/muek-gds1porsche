@@ -1,4 +1,3 @@
-
 // Copyright (c) 2023. Leonhard Baschang
 
 
@@ -61,7 +60,6 @@ uint16_t * Axis::getDigitalCalibrationData() {
 
 void Axis::setCalibrateCenter(bool pCalibrateCenter) {
     calibrateCenter = pCalibrateCenter;
-
 }
 
 bool Axis::getCalibrateCenter() const {
@@ -76,6 +74,16 @@ uint8_t Axis::getMode() const {
     return mode;
 }
 
+void Axis::setDigitalIndex(uint8_t index) {
+    digitalIndex = index;
+}
+
+uint8_t Axis::getDigitalIndex() const {
+    return digitalIndex;
+}
+
+
+
 
 
 
@@ -85,16 +93,59 @@ uint16_t Axis::readSensor() const {
     return adc->readChannel(index);
 }
 
-double Axis::logCalculation(double value) {
-    if (value < calibrationData[2]) {
-        return ((0 - -1028) / (pow(base[0], calibrationData[2]) - pow(base[0], calibrationData[0]))) *
-               (pow(base[0], value) - pow(base[0], calibrationData[0])) + -1028;
-    } else {
-        return ((1028 - 0) / (pow(base[1], calibrationData[1]) - pow(base[1], calibrationData[2]))) *
-               (pow(base[1], value) - pow(base[1], calibrationData[2])) + 0;
+
+long Axis::linearCalculation(uint16_t value) {
+    if(value < calibrationData[2]){
+        return map(value, calibrationData[0], calibrationData[2], -1028,0);
+    }else{
+        return map(value, calibrationData[2], calibrationData[1], 0,1028);
     }
 
 
+}
+
+double Axis::logCalculation(double value) {
+
+    if (value < calibrationData[2]) {
+        return -((0 - -1028) / (pow(1-(base[0]-1), calibrationData[2]) - pow(1-(base[0]-1), calibrationData[0])) *
+                 (pow(1-(base[0]-1), -value+calibrationData[2]) - pow(1-(base[0]-1), calibrationData[0])));
+    } else {
+        return (1028 - 0) / (pow(1-(base[1]-1), calibrationData[1]) - pow(1-(base[1]-1), calibrationData[2])) *
+               (pow(1-(base[1]-1), value) - pow(1-(base[1]-1), calibrationData[2])) + 0;
+    }
+
+
+
+}
+
+double Axis::expCalculation(double value) {
+
+    if (value < calibrationData[2]) {
+        return -((0 - -1028) / (pow(base[0], calibrationData[2]) - pow(base[0], calibrationData[0])) *
+           (pow(base[0], -value+calibrationData[2]) - pow(base[0], calibrationData[0])));
+    } else {
+        return (1028 - 0) / (pow(base[1], calibrationData[1]) - pow(base[1], calibrationData[2])) *
+           (pow(base[1], value) - pow(base[1], calibrationData[2])) + 0;
+    }
+
+}
+
+int8_t Axis::digitalCalculation(double value) {
+
+
+    int8_t factor = 1;
+    if(digitalCalibrationData[0] > digitalCalibrationData[1]) {
+        factor = -1;
+    }
+
+    if((value > digitalCalibrationData[0] && value < digitalCalibrationData[1]) || (value > digitalCalibrationData[1] && value < digitalCalibrationData[0])){
+        return 0;
+    }else if(value > digitalCalibrationData[1]){
+        return 1 * factor;
+    }else if(value < digitalCalibrationData[0]){
+        return -1 * factor;
+    }
+    return 0;
 }
 
 void Axis::calculateBase() {
@@ -116,15 +167,27 @@ int32_t Axis::getValue() {
 
     if(mode == 0){
         // linear
-        value = map(currentRawValue, calibrationData[0], calibrationData[1], -1028, 1028);
-    }else if(mode == 1 || mode == 2){
-        // exponential || Logarithm
+        value = linearCalculation(currentRawValue);
+    }else if(mode == 1){
+        // exponential
+        value = long(expCalculation(double(currentRawValue)));
+    }else if(mode == 2){
+        // Logarithm
         value = long(logCalculation(double(currentRawValue)));
-
+    }else if(mode == 3){
+        //digital
+        int8_t digitalValue = digitalCalculation(currentRawValue);
+        value = digitalValue * 1028;
     }
 
 
+
     return value;
+}
+
+int8_t Axis::getDigitalValue() {
+
+    return digitalCalculation(currentRawValue);
 }
 
 bool Axis::valueChanged() {
@@ -142,13 +205,11 @@ void Axis::initSettingsMenu(Navigator *navigator){
     settingsMenu = new Menu(navigator);
 
     settingsMenu->addItem("Back", &Navigator::navigatorMenuChangeStatic, 0);
-    settingsMenu->addItem("Save Settings", &Axis::axisEntryAction, index * 10 + 0);
     settingsMenu->addItem("Calibrate", &Axis::axisEntryAction, index * 10 + 1);
-    settingsMenu->addItem("Calibrate center?", &Axis::axisEntryAction, index * 10 + 2);
-    settingsMenu->addItem("Base set", &Axis::axisEntryAction, index * 10 + 3);
-    settingsMenu->addItem("Reset base", &Axis::axisEntryAction, index * 10 + 4);
-    settingsMenu->addItem("Mode", &Axis::axisEntryAction, index * 10 + 5);
-    settingsMenu->addItem("Digital Calibration", &Axis::axisEntryAction, index * 10 + 6);
+    settingsMenu->addItem("Base set", &Axis::axisEntryAction, index * 10 + 2);
+    settingsMenu->addItem("Reset base", &Axis::axisEntryAction, index * 10 + 3);
+    settingsMenu->addItem("Mode", &Axis::axisEntryAction, index * 10 + 4);
+    settingsMenu->addItem("Digital Calibration", &Axis::axisEntryAction, index * 10 + 5);
 
 
 }
@@ -156,25 +217,19 @@ void Axis::initSettingsMenu(Navigator *navigator){
 void Axis::axisEntryAction(Navigator *navigator, uint8_t index) {
     uint8_t axisIndex = index / 10;
     switch (index % 10){
-        case 0:
-            navigator->joystick->storeAxisCalibration(axisIndex);
-            break;
         case 1:
             navigator->input->axisCalibration(navigator->joystick->axis[axisIndex]);
             break;
         case 2:
-            navigator->input->axisCenterCalibrationPrompt(navigator->joystick->axis[axisIndex]);
-            break;
-        case 3:
             navigator->input->axisSetBase(navigator->joystick->axis[axisIndex]);
             break;
-        case 4:
+        case 3:
             navigator->joystick->axis[index/(10+5)]->calculateBase();
             break;
-        case 5:
+        case 4:
             navigator->input->axisSetMode(navigator->joystick->axis[axisIndex]);
             break;
-        case 6:
+        case 5:
             navigator->input->axisCalibrationDigital(navigator->joystick->axis[axisIndex]);
 
             break;

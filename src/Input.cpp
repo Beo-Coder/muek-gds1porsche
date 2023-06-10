@@ -12,6 +12,8 @@
 #include "MyJoystick.h"
 
 
+
+
 Input::Input(Navigator *navigator) {
     this->navigator = navigator;
 
@@ -223,7 +225,7 @@ void Input::waitUntilButtonPressed() {
 
 void Input::axisCalibration(Axis *axis) {
     navigator->encoder->mode = 100;
-    navigator->joystick->enable = false;
+    navigator->joystick->disableOutput();
     uint16_t data[3];
 
     String screenText[] = {"Set axis " + String(axis->getIndex()) + " to", "minimum position", "Confirm with button", ""};
@@ -236,23 +238,7 @@ void Input::axisCalibration(Axis *axis) {
     waitUntilButtonPressed();
     data[1] = axis->readSensor();
 
-    if (axis->getCalibrateCenter() == 1) {
-        screenText[1] = "center position";
-        displaySplashScreen(screenText);
-        waitUntilButtonPressed();
-        data[2] = axis->readSensor();
-    }
-
-    axis->setCalibrationData(data);
-
-
-    navigator->joystick->enable = true;
-    returnToMenu();
-
-}
-
-void Input::axisCenterCalibrationPrompt(Axis *axis) {
-    navigator->encoder->mode = 100;
+    //ask for center cal
 
     uint8_t value = 0;
     if (axis->getCalibrateCenter()) {
@@ -266,12 +252,33 @@ void Input::axisCenterCalibrationPrompt(Axis *axis) {
     setSelect();
     if (value == 0) {
         axis->setCalibrateCenter(true);
+        screenText[1] = "center position";
+        displaySplashScreen(screenText);
+        waitUntilButtonPressed();
+        data[2] = axis->readSensor();
     } else {
         axis->setCalibrateCenter(false);
+        uint16_t smaller;
+        uint16_t bigger;
+        if(data[0] < data[1]){
+            smaller = data[0];
+            bigger = data[1];
+
+        }else{
+            smaller = data[1];
+            bigger = data[0];
+        }
+        data[2] = ((bigger - smaller)/2) + smaller;
     }
 
+    axis->setCalibrationData(data);
+
+
+    navigator->joystick->enableOutput();
     returnToMenu();
+
 }
+
 
 void Input::axisSetBase(Axis *axis) {
     navigator->encoder->mode = 100;
@@ -282,7 +289,7 @@ void Input::axisSetBase(Axis *axis) {
 
 
     } else {
-        navigator->joystick->enable = false;
+        navigator->joystick->disableOutput();
         uint8_t value = 0;
         String textValues[] = {"Different bases", "Same bases"};
         selectInput("Center cal. axis " + String(axis->getIndex()), &value, value, textValues, 2);
@@ -323,7 +330,7 @@ void Input::axisSetBase(Axis *axis) {
             axis->setBase(base[0],base[0]);
 
         }
-        navigator->joystick->enable = true;
+        navigator->joystick->enableOutput();
 
     }
     returnToMenu();
@@ -334,8 +341,8 @@ void Input::axisSetMode(Axis *axis) {
     navigator->encoder->mode = 100;
     uint8_t value = axis->getMode();
 
-    String textValues[] = {"Linear", "Exponential", "Logarithm"};
-    selectInput("Set mode for axis " + String(axis->getIndex()), &value, value, textValues, 3);
+    String textValues[] = {"Linear", "Exponential", "Logarithm", "Digital"};
+    selectInput("Set mode for axis " + String(axis->getIndex()), &value, value, textValues, 4);
     waitUntilButtonPressed();
     setSelect();
 
@@ -347,7 +354,7 @@ void Input::axisSetMode(Axis *axis) {
 
 void Input::axisCalibrationDigital(Axis *axis) {
     navigator->encoder->mode = 100;
-    navigator->joystick->enable = false;
+    navigator->joystick->disableOutput();
 
     uint16_t data[2];
 
@@ -364,9 +371,130 @@ void Input::axisCalibrationDigital(Axis *axis) {
     axis->setDigitalCalibrationData(data);
 
 
-    navigator->joystick->enable = true;
+    navigator->joystick->enableOutput();
     returnToMenu();
 
+}
+
+void Input::generalSetAxisCount() {
+    navigator->encoder->mode = 100;
+    navigator->joystick->disableOutput();
+    double value;
+    valueInput("Set axis count", &value, navigator->joystick->getNewAxisCount(), MAX_AXIS_COUNT, 0, 1,
+               0);
+    waitUntilButtonPressed();
+    setValue();
+    navigator->joystick->setNewAxisCount(uint8_t(value));
+
+    reinitPrompt();
+    returnToMenu();
+
+
+}
+
+void Input::generalSetButtonCount() {
+    navigator->encoder->mode = 100;
+    navigator->joystick->disableOutput();
+    double value;
+    valueInput("Set button count", &value, navigator->joystick->getNewButtonCount(), MAX_BUTTON_COUNT, 0, 1,
+               0);
+    waitUntilButtonPressed();
+    setValue();
+    navigator->joystick->setNewButtonCount(uint8_t(value));
+
+    reinitPrompt();
+    returnToMenu();
+
+
+}
+
+void Input::generalSetMode() {
+    navigator->encoder->mode = 100;
+    navigator->joystick->disableOutput();
+    uint8_t value = navigator->joystick->getNewJoystickMode();
+
+    String textValues[] = {"Analog", "Analog/Digital", "Keyboard"};
+    selectInput("Digital axes mode", &value, value, textValues, 3);
+    waitUntilButtonPressed();
+    setSelect();
+
+    navigator->joystick->setNewJoystickMode(value);
+    reinitPrompt();
+
+
+
+    returnToMenu();
+
+
+
+
+}
+
+void Input::reinitPrompt() {
+    navigator->encoder->mode = 100;
+    String screenText[] = {"Please save settings", "and reinit joystick",  "", ""};
+    displaySplashScreen(screenText);
+    waitUntilButtonPressed();
+
+}
+
+void Input::showWaitScreen(arduino::String *values) {
+    navigator->encoder->mode = 100;
+    navigator->display->lcd->clear();
+    for (int i = 0; i < navigator->display->lcdHeight; i++) {
+        navigator->display->lcd->setCursor(0, i);
+        navigator->display->lcd->print(values[i]);
+    }
+}
+
+void Input::endWaitScreen() {
+    navigator->display->lcd->clear();
+    returnToMenu();
+}
+void Input::showEEPROMWaitScreen(){
+    String eepromWriteText[] = {"Data is stored", "Please wait.", "Do not unplug!", ""};
+    showWaitScreen(eepromWriteText);
+}
+
+void Input::resetPresetPrompt() {
+    navigator->encoder->mode = 100;
+    uint8_t value;
+    String textValues[] = {"No", "Yes"};
+    selectInput("Reset that preset?", &value, 0, textValues, 2);
+    waitUntilButtonPressed();
+    setSelect();
+
+    if(value == 1){
+        showEEPROMWaitScreen();
+        navigator->joystick->resetPreset(navigator->joystick->getPreset());
+        endWaitScreen();
+    }
+
+    returnToMenu();
+}
+
+void Input::factoryResetPrompt() {
+    navigator->encoder->mode = 100;
+    uint8_t value;
+    String textValues[] = {"No", "Yes"};
+    selectInput("Reset ALL settings?", &value, 0, textValues, 2);
+    waitUntilButtonPressed();
+    setSelect();
+    if(value == 0){
+        returnToMenu();
+        return;
+    }
+    selectInput("Really?!", &value, 0, textValues, 2);
+    waitUntilButtonPressed();
+    setSelect();
+
+    if(value == 1){
+        showEEPROMWaitScreen();
+        navigator->joystick->factoryReset();
+        endWaitScreen();
+    }
+
+    returnToMenu();
 }
 
 

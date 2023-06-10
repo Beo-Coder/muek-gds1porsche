@@ -10,6 +10,9 @@
 #include "Input.h"
 #include "MyJoystick.h"
 #include "Axis.h"
+#include "MCP3204_MCP3208.h"
+#include "EEPROM_Microchip_24.h"
+
 
 
 Navigator::Navigator(Display *display, MyJoystick *joystick) {
@@ -17,10 +20,17 @@ Navigator::Navigator(Display *display, MyJoystick *joystick) {
     this->joystick = joystick;
     input = new Input(this);
 
+
+
+
+}
+
+void Navigator::createMenus() {
     testMenu = new Menu(this);
     mainMenu = new Menu(this);
     settingsMenu = new Menu(this);
 
+    settingsMenuPresets = new Menu(this);
     settingsMenuGeneral = new Menu(this);
     settingsMenuAxes = new Menu(this);
     settingsMenuButtons = new Menu(this);
@@ -28,19 +38,30 @@ Navigator::Navigator(Display *display, MyJoystick *joystick) {
     mainMenu->addItem("Porsche Muehk");
     mainMenu->addItem("Settings", &navigatorMenuChangeStatic, 2);
     mainMenu->addItem("Debug", &navigatorMenuChangeStatic, 3);
-    //mainMenu->addItem("Test", &navigatorItemActionStatic, 200);
-    //mainMenu->addItem("Test2", &navigatorItemActionStatic, 201);
-    //mainMenu->addItem("Test3", &navigatorItemActionStatic, 202);
+    mainMenu->addItem("Dis/Enable Output", &navigatorItemActionStatic, 0);
+
 
     settingsMenu->addItem("Back", &navigatorMenuChangeStatic, 0);
-    settingsMenu->addItem("General", &navigatorMenuChangeStatic, 20);
-    settingsMenu->addItem("Axes", &navigatorMenuChangeStatic, 21);
-    settingsMenu->addItem("Buttons", &navigatorMenuChangeStatic, 22);
+    settingsMenu->addItem("Save current Preset", &navigatorItemActionStatic, 1);
+    settingsMenu->addItem("Set Preset", &navigatorMenuChangeStatic, 20);
+    settingsMenu->addItem("General", &navigatorMenuChangeStatic, 21);
+    settingsMenu->addItem("Axes", &navigatorMenuChangeStatic, 22);
+    settingsMenu->addItem("Buttons", &navigatorMenuChangeStatic, 23);
+    settingsMenu->addItem("Reinit Joystick", &navigatorItemActionStatic, 199);
+    settingsMenu->addItem("Reset Preset", &navigatorItemActionStatic, 2);
+    settingsMenu->addItem("Factory Reset", &navigatorItemActionStatic, 3);
+
+    settingsMenuPresets->addItem("Back", &navigatorMenuChangeStatic, 0);
+    for(int i=0; i<EEPROM_PRESET_COUNT; i++){
+        settingsMenuPresets->addItem("Preset " + String(i), &MyJoystick::presetEntryStatic, i);
+    }
 
     settingsMenuGeneral->addItem("Back", &navigatorMenuChangeStatic, 0);
+
     settingsMenuGeneral->addItem("Number of Axes", &navigatorItemActionStatic, 200);
     settingsMenuGeneral->addItem("Number of Buttons", &navigatorItemActionStatic, 201);
     settingsMenuGeneral->addItem("Mode", &navigatorItemActionStatic, 202);
+
 
 
     settingsMenuAxes->addItem("Back", &navigatorMenuChangeStatic, 0);
@@ -56,6 +77,8 @@ Navigator::Navigator(Display *display, MyJoystick *joystick) {
     }
 
 
+
+
     testMenu->addItem("Back", &navigatorMenuChangeStatic, 0);
 
     testMenu->addItem("Hallo Navigator1");
@@ -65,12 +88,11 @@ Navigator::Navigator(Display *display, MyJoystick *joystick) {
     testMenu->addItem("Hallo Navigator5");
     testMenu->addItem("Hallo Navigator6");
     testMenu->addItem("Hallo Navigator7");
-
-
 }
 
 void Navigator::init(Encoder *encoder) {
     this->encoder = encoder;
+    createMenus();
     this->display->setNewMenu(mainMenu, false);
     menuHistory[menuHistoryPointer] = mainMenu;
 
@@ -160,12 +182,15 @@ void Navigator::menuChange(uint8_t index) {
             setNextMenu(testMenu);
             break;
         case 20:
-            setNextMenu(settingsMenuGeneral);
+            setNextMenu(settingsMenuPresets);
             break;
         case 21:
-            setNextMenu(settingsMenuAxes);
+            setNextMenu(settingsMenuGeneral);
             break;
         case 22:
+            setNextMenu(settingsMenuAxes);
+            break;
+        case 23:
             setNextMenu(settingsMenuButtons);
             break;
         default:
@@ -174,21 +199,44 @@ void Navigator::menuChange(uint8_t index) {
     }
 }
 
+
 void Navigator::itemAction(uint8_t index){
     String text[] = {"Hallo", "1", "true", "false", "false2"};
     String text2[] = {"Hallo", "SplashScreen", "Hier", "Wow"};
+
+    uint8_t buttonDemuxPins[] = {BUTTON_DEMUX_E, BUTTON_DEMUX_S0, BUTTON_DEMUX_S1, BUTTON_DEMUX_S2};
+    uint8_t buttonColumnPins[] = {BUTTON_COLUMN_0, BUTTON_COLUMN_1, BUTTON_COLUMN_2};
+
     switch (index) {
+        case 0:
+            joystick->toggleOutput();
+            break;
+        case 1:
+            input->showEEPROMWaitScreen();
+            joystick->storeGeneralConfig();
+            joystick->storePreset();
+            input->endWaitScreen();
+            break;
+        case 2:
+            input->resetPresetPrompt();
+            itemAction(199);
+            break;
+        case 3:
+            input->factoryResetPrompt();
+            itemAction(199);
+            break;
+        case 199:
+            #define AIRCR_Register (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
+            AIRCR_Register = 0x5FA0004;
+            break;
         case 200:
-            input->valueInput("Test Value Input", &testValue, testValue, 2.0, -1.0, 0.1, 2);
+            input->generalSetAxisCount();
             break;
         case 201:
-
-            input->selectInput("Test Select Input", &testSelectInput, testSelectInput, text, 5);
+            input->generalSetButtonCount();
             break;
-
         case 202:
-
-            input->setSplashScreen(text2);
+            input->generalSetMode();
             break;
     }
 

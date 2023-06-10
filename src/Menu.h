@@ -8,9 +8,9 @@
 class Navigator;
 
 class Menu {
-    String itemName[10];
-    void(*itemFunction[10])(Navigator*, uint8_t);
-    uint8_t itemFunctionIndex[10];
+    String itemName[20];
+    void(*itemFunction[20])(Navigator*, uint8_t);
+    uint8_t itemFunctionIndex[20];
     uint8_t itemCount = 0;
 
     Navigator *navigator;

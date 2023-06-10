@@ -1,5 +1,4 @@
 // Copyright (c) 2023. Leonhard Baschang
-
 #include <Arduino.h>
 #include "Display.h"
 #include "Menu.h"
@@ -10,11 +9,14 @@
 #include "MCP3204_MCP3208.h"
 #include "header.h"
 
-#include "pico/multicore.h"
-#include "hardware/irq.h"
-#include "hardware/gpio.h"
 
 #include "LiquidCrystal_I2C.h"
+
+#include "Axis.h"
+
+
+
+
 
 uint8_t buttonDemuxPins[] = {BUTTON_DEMUX_E, BUTTON_DEMUX_S0, BUTTON_DEMUX_S1, BUTTON_DEMUX_S2};
 uint8_t buttonColumnPins[] = {BUTTON_COLUMN_0, BUTTON_COLUMN_1, BUTTON_COLUMN_2};
@@ -22,10 +24,15 @@ uint8_t buttonColumnPins[] = {BUTTON_COLUMN_0, BUTTON_COLUMN_1, BUTTON_COLUMN_2}
 
 
 
-unsigned long lastEncoderButtonPress = 0;
+
+unsigned long lastEncoderButtonPress = 100;
 bool lastButtonState = false;
 
-unsigned long lastEncoderTime = 0;
+unsigned long lastEncoderTime = 100;
+
+
+
+
 
 
 
@@ -38,9 +45,11 @@ MCP3204_MCP3208 adc(AD_CHANNEL_COUNT, AD_SPI_CS, AD_SPI_SCK, AD_SPI_MOSI, AD_SPI
 
 Display display(0x27, LCD_WIDTH, LCD_HEIGHT);
 
-MyJoystick joystick(AXIS_COUNT, BUTTON_COUNT, &adc, &eeprom, buttonDemuxPins, buttonColumnPins);
+MyJoystick joystick(&adc, &eeprom, buttonDemuxPins, buttonColumnPins);
 
 Navigator navigator(&display, &joystick);
+
+//KeyboardHID keyboard;
 
 void encoderISR() {
 
@@ -59,7 +68,6 @@ void encoderISR() {
 }
 void encoderButtonISR() {
     lastButtonState = !lastButtonState;
-    digitalWrite(25, lastButtonState);
     unsigned long currentMillis = millis();
     if((currentMillis - lastEncoderButtonPress) > ENCODER_BUTTON_DEBOUNCE_TIME){
         navigator.encoder->setButtonFlag();
@@ -85,6 +93,7 @@ void setup() {
     Serial1.println("---------------------------------------");
     Serial1.println("---------------------------------------");
     Serial1.println("---------------------------------------");
+    Serial1.println("Begin");
 
 
     display.init();
@@ -93,10 +102,17 @@ void setup() {
 
 
 
+
+
+
+
+
+
 }
 
 
 void loop() {
+
 
 
 
@@ -108,6 +124,8 @@ void loop() {
 
     joystick.updateAxis();
     joystick.updateButton();
+
+
 
 
     navigator.checkEncoderFlag();

@@ -16,12 +16,15 @@ class Input;
 class MyJoystick;
 
 
+
 class Navigator {
+
 
     Menu *mainMenu;
     Menu *settingsMenu;
     Menu *testMenu;
 
+    Menu *settingsMenuPresets;
     Menu *settingsMenuGeneral;
     Menu *settingsMenuAxes;
     Menu *settingsMenuButtons;
@@ -42,6 +45,8 @@ class Navigator {
 
     double testValue;
     uint8_t testSelectInput = 3;
+
+    void createMenus();
 
 
 

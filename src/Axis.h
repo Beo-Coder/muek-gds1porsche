@@ -30,12 +30,14 @@ class Axis {
     MCP3204_MCP3208 *adc;
 
     uint8_t index;
+
     uint16_t calibrationData[3];
     bool calibrateCenter = false;
     uint16_t digitalCalibrationData[2];
     double base[2];
 
     uint8_t mode = 0;
+    uint8_t digitalIndex;
 
 
 
@@ -45,7 +47,10 @@ class Axis {
 
 
 
+    long linearCalculation(uint16_t value);
     double logCalculation(double value);
+    double expCalculation(double value);
+    int8_t digitalCalculation(double value);
 
 
 
@@ -79,14 +84,20 @@ public:
     void setMode(uint8_t pMode);
     uint8_t getMode() const;
 
+    void setDigitalIndex(uint8_t index);
+    uint8_t getDigitalIndex() const;
+
+
 
     int32_t getValue();
+    int8_t getDigitalValue();
 
     bool valueChanged();
 
 
     void initSettingsMenu(Navigator *navigator);
     static void axisEntryAction(Navigator *navigator, uint8_t index);
+
 
 
 };
