@@ -291,7 +291,7 @@ void Input::axisSetBase(Axis *axis) {
         navigator->joystick->disableOutput();
         uint8_t value = 0;
         String textValues[] = {"Different bases", "Same bases", "Reset base"};
-        selectInput("Center cal. axis " + String(axis->getIndex()), &value, value, textValues, 3);
+        selectInput("Set ", &value, value, textValues, 3);
         waitUntilButtonPressed();
         setSelect();
 
