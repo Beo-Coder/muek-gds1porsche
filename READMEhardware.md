@@ -125,7 +125,7 @@ In a next version of the pcb, this maybe could be put on the pcb itself.
                            |     +------------+     |
                            |          100Ω          |
                            |                        |
-CLK from Encoder +---------+                        +---------+ CLK to CLK Oin on Header
+CLK from Encoder +---------+                        +---------+ CLK to CLK Pin on Header
                            |                        |
                            |         |    |         |
                            |         |    |         |
