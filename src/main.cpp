@@ -29,10 +29,10 @@ void encoderISR() {
 
 
     if (digitalRead(ENCODER_DT_PIN)) {
-        navigator.encoder->setEncoderFlag(1);
+        navigator.encoder->setEncoderFlag(-1);
 
     } else {
-        navigator.encoder->setEncoderFlag(-1);
+        navigator.encoder->setEncoderFlag(1);
 
     }
 
