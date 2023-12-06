@@ -38,6 +38,7 @@ Various actuators can be connected either as analog or digital sensors, like pot
 It can emulate a gamepad/joystick or a keyboard, depending on which mode is desired.
 Each analog axis can operate in one of four different modes, giving full control over the behaviour of the axis.
 
+**It may be useful to use an emulator on the host PC to further configure the axes and buttons.**
 # Usage
 
 1. Connect all analog and digital actuators according to the pinout guide

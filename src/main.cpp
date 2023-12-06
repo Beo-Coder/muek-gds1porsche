@@ -56,6 +56,7 @@ void setup() {
     Serial1.println("Porsche Muehk V" + String(VERSION));
     Serial1.println("Made by Leonhard Baschang ( ._.)");
     Serial1.println("J1.2 2022/23");
+    Serial1.println("J2.2 2023/24");
     Serial1.println("Made for GDS1");
     Serial1.println("---------------------------------------");
 
