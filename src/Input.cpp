@@ -506,6 +506,7 @@ void Input::resetPresetPrompt() {
         showEEPROMWaitScreen();
         navigator->joystick->resetPreset(navigator->joystick->getPreset());
         endWaitScreen();
+        Navigator::navigatorItemActionStatic(navigator, 199);
     }
 
     returnToMenu();
@@ -530,6 +531,7 @@ void Input::factoryResetPrompt() {
         showEEPROMWaitScreen();
         navigator->joystick->factoryReset();
         endWaitScreen();
+        Navigator::navigatorItemActionStatic(navigator, 199);
     }
 
     returnToMenu();

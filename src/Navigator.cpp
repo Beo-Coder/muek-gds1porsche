@@ -210,11 +210,11 @@ void Navigator::itemAction(uint8_t index) {
             break;
         case 2:
             input->resetPresetPrompt();
-            itemAction(199);
+
             break;
         case 3:
             input->factoryResetPrompt();
-            itemAction(199);
+
             break;
         case 4:
             input->generalSetPreset();
