@@ -132,13 +132,16 @@ void Navigator::checkEncoderFlag() {
 void Navigator::checkEncoderButtonFlag() {
     if (encoder->buttonFlag) {
         lastUserInput = millis() / 1000;
-        switch (encoder->mode) {
-            case 0:
-                display->currentMenu->executeFunction(display->currentCursorPos + display->scrollOffset);
-                break;
-            default:
-                break;
+        if(!backlightDim){
+            switch (encoder->mode) {
+                case 0:
+                    display->currentMenu->executeFunction(display->currentCursorPos + display->scrollOffset);
+                    break;
+                default:
+                    break;
+            }
         }
+
         encoder->buttonFlag = false;
     }
 
@@ -147,11 +150,11 @@ void Navigator::checkEncoderButtonFlag() {
 void Navigator::checkDisplay() {
     if (lcdBacklightTime != 0) {
         unsigned long currentTime = millis() / 1000;
-        if (currentTime - lastUserInput < lcdBacklightTime && backlightDim) {
+        if ((currentTime - lastUserInput < lcdBacklightTime) && backlightDim) {
             display->lcd->backlight();
             backlightDim = false;
 
-        } else if (currentTime - lastUserInput > lcdBacklightTime && !backlightDim) {
+        } else if ((currentTime - lastUserInput > lcdBacklightTime) && !backlightDim) {
             display->lcd->noBacklight();
             backlightDim = true;
         }
