@@ -193,8 +193,14 @@ These values will can't be directly controlled.
 |---------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
 | ![log diagram same bases no center calibration](assets/images/axisCurves/axisGraphLog.png "log axis control curve") | ![log diagram diff base no center calibration](assets/images/axisCurves/axisGraphLogDiff.png "log axis control curve") | ![log diagram diff bases center calibration](assets/images/axisCurves/axisGraphLogDiffCenter.png "log axis control curve") |
 
+##### Other curves (Combinations of all) :
+| Exponential half with other half linear (without center calibration)                                                                                 | Exponential half with other half linear, (different) center calibration                                                                                       | Logarithmic half with other half exponential, (different) center calibration                                                                        |
+|------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| ![Exponential half with other half linear (without center calibration)](assets/images/axisCurves/axisGraphExpoLinear.png "other axis control curve") | ![Exponential half with other half linear, (different) center calibration](assets/images/axisCurves/axisGraphExpoLinearCenter.png "other axis control curve") | ![Logarithmic half with Exponential other, (different) center calibration](assets/images/axisCurves/axisGraphExpoLog.png "other axis control curve") |
+
+
 **Note:**
-There are many other ways to adjust the curves. See also the Desmos calculator: [Desmos calculator](https://www.desmos.com/calculator/uvswftkddu)  
+There are many other ways to adjust the curves. See also the Desmos calculator: [Desmos calculator](https://www.desmos.com/calculator/y6jawpiyea)  
 Note that the values of the Desmos calculator do not match those of the device.
 
 
@@ -268,8 +274,6 @@ If there are any bugs/problems, or you have any questions, please contact me.
 
 
 **ToDo**
-
-In expo and log mode in value expo + c0 (see desmos)
 
 Check Keyboard Analog/Digital Buttons/axes count etc.
 
