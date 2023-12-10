@@ -111,24 +111,6 @@ long Axis::linearCalculation(uint16_t value) {
 }
 
 
-double Axis::logCalculation(double value) {
-
-    bool inverted = calibrationData[0] > calibrationData[1];
-
-
-    if ((value < calibrationData[2] && !inverted) || (value > calibrationData[2] && inverted)) {
-        return (pow((value - calibrationData[2]) / (calibrationData[0] - calibrationData[2]),
-                    tan((PI / 4) * (-base[0] + 1))) * (JOYSTICK_MIN_VALUE - JOYSTICK_CENTER_VALUE) +
-                JOYSTICK_CENTER_VALUE);
-    } else if ((value > calibrationData[2] && !inverted) || (value < calibrationData[2] && inverted)) {
-        return (pow((value - calibrationData[2]) / (calibrationData[1] - calibrationData[2]),
-                    tan((PI / 4) * (-base[1] + 1))) * (JOYSTICK_MAX_VALUE - JOYSTICK_CENTER_VALUE) +
-                JOYSTICK_CENTER_VALUE);
-    }
-
-
-}
-
 double Axis::expCalculation(double value) {
 
     bool inverted = calibrationData[0] > calibrationData[1];
@@ -182,9 +164,6 @@ int32_t Axis::getValue() {
         // exponential
         value = long(expCalculation(double(currentRawValue)));
     } else if (mode == 2) {
-        // Logarithm
-        value = long(logCalculation(double(currentRawValue)));
-    } else if (mode == 3) {
         //digital
         auto digitalValue = int8_t(digitalCalculation(currentRawValue));
         value = digitalValue * JOYSTICK_MAX_VALUE;

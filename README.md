@@ -140,8 +140,7 @@ If the center is calibrated one half of the calibration curve can be shorter/lon
 
 #### Modes
 - linear: The curve of the output is linear to the input
-- exponential: The curve of the output is exponential to the input
-- logarithmic: The curve of the output is logarithmic to the input
+- exponential/logarithmic: The curve of the output is exponential/logarithmic to the input (based on base)
 - digital: The axis has three states (center/off, upper limit, lower limit) in the general "Analog" mode these will be represented as an analog axis which is either 0, maximum or minimum.
 
 
@@ -149,8 +148,10 @@ If the center is calibrated one half of the calibration curve can be shorter/lon
 In exponential and logarithmic mode the base will set the curvature/steepness of the output curve.  
 The output curve is split in two halves (base 0 and base 1).
 Each base can be set separately or both bases can be set to the same value.  
-See Diagrams below.
-
+Base 0 is the base for the curve between minimum and the center, base 1 for the middle between maximum.  
+For exponential curves the value should be greater than 0, for logarithmic curves the value should be smaller than 0.  
+If value is 0 it is linear.  
+See also diagrams below.
 
 #### Digital Calibration
 This will select the digital lower and upper limit of the axis.  

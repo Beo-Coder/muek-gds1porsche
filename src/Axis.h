@@ -7,8 +7,8 @@
 
 class MCP3204_MCP3208;
 
-#define BASE_MAX 0.9
-#define BASE_MIN 0.01
+#define BASE_MAX 0.99
+#define BASE_MIN (-0.99)
 
 #define BASE_STEP_SIZE 0.01
 #define BASE_DISPLAY_RESOLUTION 2

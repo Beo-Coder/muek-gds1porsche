@@ -38,7 +38,7 @@ void Input::valueInput(const String &header, double *value, double startValue, d
 }
 
 bool areDoubleSame(double dFirstVal, double dSecondVal) {
-    return std::fabs(dFirstVal - dSecondVal) < 1E-5;
+    return std::fabs(dFirstVal - dSecondVal) < 1.0/(pow(10,BASE_DISPLAY_RESOLUTION+1));
 }
 
 void Input::changeValueInput(int8_t direction) {
@@ -281,7 +281,7 @@ void Input::axisCalibration(Axis *axis) {
 
 void Input::axisSetBase(Axis *axis) {
     navigator->encoder->mode = 100;
-    if (axis->getMode() == 0) {
+    if (axis->getMode() != 1) {
         String screenText[] = {"Wrong mode", "Please set to expo.", "or log. mode", ""};
         displaySplashScreen(screenText);
         waitUntilButtonPressed();
@@ -296,16 +296,18 @@ void Input::axisSetBase(Axis *axis) {
         setSelect();
 
         double base[2];
+        double maxBase = BASE_MAX;
+        double minBase = BASE_MIN;
 
 
         double *currentBase = axis->getBase();
         if (value == 0) {
-            valueInput("Set base 0", &base[0], currentBase[0], BASE_MAX, BASE_MIN, BASE_STEP_SIZE,
+            valueInput("Set base 0", &base[0], currentBase[0], maxBase, minBase, BASE_STEP_SIZE,
                        BASE_DISPLAY_RESOLUTION);
             waitUntilButtonPressed();
             setValue();
 
-            valueInput("Set base 1", &base[1], currentBase[1], BASE_MAX, BASE_MIN, BASE_STEP_SIZE,
+            valueInput("Set base 1", &base[1], currentBase[1], maxBase, minBase, BASE_STEP_SIZE,
                        BASE_DISPLAY_RESOLUTION);
             waitUntilButtonPressed();
             setValue();
@@ -313,7 +315,7 @@ void Input::axisSetBase(Axis *axis) {
 
             axis->setBase(base[0], base[1]);
         } else if (value == 1) {
-            valueInput("Set bases", &base[0], currentBase[0], BASE_MAX, BASE_MIN, BASE_STEP_SIZE,
+            valueInput("Set bases", &base[0], currentBase[0], maxBase, minBase, BASE_STEP_SIZE,
                        BASE_DISPLAY_RESOLUTION);
             waitUntilButtonPressed();
             setValue();
@@ -334,8 +336,8 @@ void Input::axisSetMode(Axis *axis) {
     navigator->encoder->mode = 100;
     uint8_t value = axis->getMode();
 
-    String textValues[] = {"Linear", "Exponential", "Logarithm", "Digital"};
-    selectInput("Set mode for axis " + String(axis->getIndex()), &value, value, textValues, 4);
+    String textValues[] = {"Linear", "Expo/Log", "Digital"};
+    selectInput("Set mode for axis " + String(axis->getIndex()), &value, value, textValues, 3);
     waitUntilButtonPressed();
     setSelect();
 
