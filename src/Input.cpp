@@ -296,25 +296,16 @@ void Input::axisSetBase(Axis *axis) {
         setSelect();
 
         double base[2];
-        double maxBase;
-        double minBase;
 
-        if (axis->getMode() == 1) {
-            maxBase = BASE_MAX_EXPO;
-            minBase = BASE_MIN_EXPO;
-        } else {
-            maxBase = BASE_MAX_LOG;
-            minBase = BASE_MIN_LOG;
-        }
 
         double *currentBase = axis->getBase();
         if (value == 0) {
-            valueInput("Set base 0", &base[0], currentBase[0], maxBase, minBase, BASE_STEP_SIZE,
+            valueInput("Set base 0", &base[0], currentBase[0], BASE_MAX, BASE_MIN, BASE_STEP_SIZE,
                        BASE_DISPLAY_RESOLUTION);
             waitUntilButtonPressed();
             setValue();
 
-            valueInput("Set base 1", &base[1], currentBase[1], maxBase, minBase, BASE_STEP_SIZE,
+            valueInput("Set base 1", &base[1], currentBase[1], BASE_MAX, BASE_MIN, BASE_STEP_SIZE,
                        BASE_DISPLAY_RESOLUTION);
             waitUntilButtonPressed();
             setValue();
@@ -322,7 +313,7 @@ void Input::axisSetBase(Axis *axis) {
 
             axis->setBase(base[0], base[1]);
         } else if (value == 1) {
-            valueInput("Set bases", &base[0], currentBase[0], maxBase, minBase, BASE_STEP_SIZE,
+            valueInput("Set bases", &base[0], currentBase[0], BASE_MAX, BASE_MIN, BASE_STEP_SIZE,
                        BASE_DISPLAY_RESOLUTION);
             waitUntilButtonPressed();
             setValue();

@@ -96,26 +96,34 @@ uint16_t Axis::readSensor() const {
 
 
 long Axis::linearCalculation(uint16_t value) {
-    if (value < calibrationData[2]) {
-        return map(value, calibrationData[0], calibrationData[2], JOYSTICK_MIN_VALUE, JOYSTICK_CENTER_VALUE);
-    } else {
-        return map(value, calibrationData[2], calibrationData[1], JOYSTICK_CENTER_VALUE, JOYSTICK_MAX_VALUE);
+
+    bool inverted = calibrationData[0] > calibrationData[1];
+
+    if ((value < calibrationData[2] && !inverted) || (value > calibrationData[2] && inverted)) {
+        return map(value, long(calibrationData[0]), long(calibrationData[2]), JOYSTICK_MIN_VALUE,
+                   JOYSTICK_CENTER_VALUE);
+    } else if ((value > calibrationData[2] && !inverted) || (value < calibrationData[2] && inverted)) {
+        return map(value, long(calibrationData[2]), long(calibrationData[1]), JOYSTICK_CENTER_VALUE,
+                   JOYSTICK_MAX_VALUE);
     }
 
 
 }
 
+
 double Axis::logCalculation(double value) {
 
-    if (value < calibrationData[2]) {
-        return -((JOYSTICK_CENTER_VALUE - JOYSTICK_MIN_VALUE) /
-                 (pow(1 - (base[0] - 1), calibrationData[2]) - pow(1 - (base[0] - 1), calibrationData[0])) *
-                 (pow(1 - (base[0] - 1), -value + calibrationData[2]) - pow(1 - (base[0] - 1), calibrationData[0])) +
-                 JOYSTICK_CENTER_VALUE);
-    } else {
-        return (JOYSTICK_MAX_VALUE - JOYSTICK_CENTER_VALUE) /
-               (pow(1 - (base[1] - 1), calibrationData[1]) - pow(1 - (base[1] - 1), calibrationData[2])) *
-               (pow(1 - (base[1] - 1), value) - pow(1 - (base[1] - 1), calibrationData[2])) + JOYSTICK_CENTER_VALUE;
+    bool inverted = calibrationData[0] > calibrationData[1];
+
+
+    if ((value < calibrationData[2] && !inverted) || (value > calibrationData[2] && inverted)) {
+        return (pow((value - calibrationData[2]) / (calibrationData[0] - calibrationData[2]),
+                    tan((PI / 4) * (-base[0] + 1))) * (JOYSTICK_MIN_VALUE - JOYSTICK_CENTER_VALUE) +
+                JOYSTICK_CENTER_VALUE);
+    } else if ((value > calibrationData[2] && !inverted) || (value < calibrationData[2] && inverted)) {
+        return (pow((value - calibrationData[2]) / (calibrationData[1] - calibrationData[2]),
+                    tan((PI / 4) * (-base[1] + 1))) * (JOYSTICK_MAX_VALUE - JOYSTICK_CENTER_VALUE) +
+                JOYSTICK_CENTER_VALUE);
     }
 
 
@@ -123,15 +131,17 @@ double Axis::logCalculation(double value) {
 
 double Axis::expCalculation(double value) {
 
-    if (value < calibrationData[2]) {
-        return -((JOYSTICK_CENTER_VALUE - JOYSTICK_MIN_VALUE) /
-                 (pow(base[0], calibrationData[2]) - pow(base[0], calibrationData[0])) *
-                 (pow(base[0], -value + calibrationData[2]) - pow(base[0], calibrationData[0])) +
-                 JOYSTICK_CENTER_VALUE);
-    } else {
-        return (JOYSTICK_MAX_VALUE - JOYSTICK_CENTER_VALUE) /
-               (pow(base[1], calibrationData[1]) - pow(base[1], calibrationData[2])) *
-               (pow(base[1], value) - pow(base[1], calibrationData[2])) + JOYSTICK_CENTER_VALUE;
+    bool inverted = calibrationData[0] > calibrationData[1];
+
+
+    if ((value < calibrationData[2] && !inverted) || (value > calibrationData[2] && inverted)) {
+        return (pow((value - calibrationData[2]) / (calibrationData[0] - calibrationData[2]),
+                    tan((PI / 4) * (base[0] + 1))) * (JOYSTICK_MIN_VALUE - JOYSTICK_CENTER_VALUE) +
+                JOYSTICK_CENTER_VALUE);
+    } else if ((value > calibrationData[2] && !inverted) || (value < calibrationData[2] && inverted)) {
+        return (pow((value - calibrationData[2]) / (calibrationData[1] - calibrationData[2]),
+                    tan((PI / 4) * (base[1] + 1))) * (JOYSTICK_MAX_VALUE - JOYSTICK_CENTER_VALUE) +
+                JOYSTICK_CENTER_VALUE);
     }
 
 }
